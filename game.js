@@ -18,7 +18,9 @@ class Game{
 }
 
 class Ground{
-  constructor(x, y, w, h){
+  constructor(x, y, w, h, xSpeed, range){
+    this.originalX = x;
+    this.originalY= y;
     this.x = x;
     this.y = y;
     this.width = w;
@@ -27,8 +29,15 @@ class Ground{
     this.right = x+this.width;
     this.bottom = this.y + this.height;
     this.top = this.y;
+    this.xSpeed=xSpeed;
+    this.range = range;
   }
   draw(){
+    this.x += this.xSpeed;
+    //change direction if surpassing range
+    if(this.x >= this.originalX+this.range || this.x <= this.originalX){
+      this.xSpeed *= -1;
+    }
     image(groundImage, this.x, this.y, this.width, this.height);
   }
 }
@@ -106,7 +115,9 @@ function setup(){
   game = new Game();
   character = new Character(0, game.ground-185, 200, 200);
   groundArray = [
-    new Ground(0, game.ground-200, 200, 200)
+    new Ground(200, game.ground-200, 200, 200, 0, 0),
+    new Ground(720, game.ground-350, 200, 200, 1, 200),
+    new Ground(200, game.ground-500, 200, 200, 0, 0)
   ];
 }
 
@@ -134,7 +145,6 @@ function drawFrame(x, y){
     }
   }
   else{ //not jumping
-    console.log(character.onTopOfBox)
     if(!character.onTopOfBox){ //and not on top of box
       character.jumpMode = true;
     }
@@ -168,6 +178,10 @@ function drawGrounds(){
     character.bottom = character.y+character.height;
     character.left = character.x;
     character.right = character.x+character.width;
+    currentGround.left = currentGround.x;
+    currentGround.right = currentGround.x+currentGround.width;
+    currentGround.bottom = currentGround.y + currentGround.height;
+    currentGround.top = currentGround.y;
     let higherThanGround = character.bottom < currentGround.top+81;
     let lowerThanGround = character.bottom > currentGround.top+137;
     let leftOfGround = character.right < currentGround.left+135;
