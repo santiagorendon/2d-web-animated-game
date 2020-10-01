@@ -2,10 +2,68 @@ let canvas;
 let theCanvas;
 let character;
 let context;
+let bitCoinArray;
 //n * m sprite
 let n = 4;
 let m = 4;
 
+//for debugging
+function mouseClicked(){
+  character.x = mouseX-100;
+  console.log(mouseY-180, game.ground)
+  if(mouseY <= game.ground){
+    character.y = mouseY-180;
+  }
+}
+class Stages{
+  constructor(){
+    this.stage1Grounds = [
+      new Ground(200, game.ground-200, 200, 200),
+      new Ground(720, game.ground-350, 200, 200, 1, 200),
+      new Ground(200, game.ground-500, 200, 200)
+    ]
+    this.stage1Coins = [
+      new BitCoin(265, 320, 0) //x, y, index
+    ]
+    this.stage2Coins = [
+      new BitCoin(250, 320, 0),
+      new BitCoin(80, 100, 1),
+      new BitCoin(1000, 500, 2)
+    ]
+    this.stage2Grounds = [
+      new Ground(250, game.ground-200, 200, 200, 0, 0, 50),
+      new Ground(760, game.ground-401, 200, 200),
+      new Ground(1200, game.ground-601, 200, 200, 0, 0, 160),
+      new Ground(760, game.ground-801, 200, 200)
+    ]
+    this.groundStages = [this.stage1Grounds,
+                         this.stage2Grounds
+    ];
+    this.coinStages = [this.stage1Coins,
+                       this.stage2Coins
+    ];
+  }
+  loadNewStage(){
+    bitCoinArray = stages.coinStages[scoreboard.stage-1];
+    groundArray = this.groundStages[scoreboard.stage-1];
+  }
+}
+class ScoreBoard{
+  constructor(x, y){
+    this.stage = 1;
+    this.coinsCollected = 0;
+    this.x = x;
+    this.y = y;
+    this.color = '#000'
+  }
+  draw(){
+    fill(this.color)
+  .strokeWeight(0)
+   .textSize(20);
+    textFont(arcadeFont);
+    text(`BitCoins ${this.coinsCollected}\nStage    ${this.stage}`, this.x, this.y);
+  }
+}
 class Game{
   constructor(){
     this.count = 0;
@@ -17,8 +75,44 @@ class Game{
   }
 }
 
+class BitCoin{
+  constructor(x, y, i){
+    this.index = i;
+    this.x = x;
+    this.y = y;
+    this.width = 70;
+    this.height = 70;
+    this.left = this.x;
+    this.right = this.x+this.width;
+    this.bottom = this.y + this.height;
+    this.top = this.y;
+  }
+  draw(){
+    image(bitCoinImage, this.x, this.y, this.width, this.height);
+  }
+  isHit(){
+    character.top = character.y;
+    character.bottom = character.y+character.height;
+    character.left = character.x;
+    character.right = character.x+character.width;
+    this.left = this.x;
+    this.right = this.x+this.width;
+    this.bottom = this.y + this.height;
+    this.top = this.y;
+    let higherThanCoin= character.bottom < this.top+20;
+    let lowerThanCoin = character.top > this.top-20;
+    let leftOfCoin = character.right < this.left+70;
+    let rightOfCoin = character.left > this.right-70;
+    //coin collected
+    if (!higherThanCoin && !lowerThanCoin && !leftOfCoin && !rightOfCoin) {
+      bitCoinArray.splice(this.index, 1);
+      scoreboard.coinsCollected += 1;
+    }
+  }
+}
 class Ground{
-  constructor(x, y, w, h, xSpeed, range){
+  constructor(x, y, w, h, xSpeed=0, range=0, flickering=0){
+    this.count = 0;
     this.originalX = x;
     this.originalY= y;
     this.x = x;
@@ -31,14 +125,54 @@ class Ground{
     this.top = this.y;
     this.xSpeed=xSpeed;
     this.range = range;
+    this.flickering = flickering;
+    this.on = true;
+  }
+  isHit(){
+    character.top = character.y;
+    character.bottom = character.y+character.height;
+    character.left = character.x;
+    character.right = character.x+character.width;
+    this.left = this.x;
+    this.right = this.x+this.width;
+    this.bottom = this.y + this.height;
+    this.top = this.y;
+    let higherThanGround = character.bottom < this.top+81;
+    let lowerThanGround = character.bottom > this.top+137;
+    let leftOfGround = character.right < this.left+135;
+    let rightOfGround = character.left > this.right-135;
+    if (!higherThanGround && !lowerThanGround && !leftOfGround && !rightOfGround) {
+      if(character.jumpPower >= 0){ //must land on tile when falling
+        character.jumpMode = false;
+        character.jumpPower = 0;
+        character.y = this.top-100;
+        character.onTopOfBox = true;
+      }
+    }
   }
   draw(){
-    this.x += this.xSpeed;
     //change direction if surpassing range
+    this.x += this.xSpeed;
     if(this.x >= this.originalX+this.range || this.x <= this.originalX){
       this.xSpeed *= -1;
     }
-    image(groundImage, this.x, this.y, this.width, this.height);
+    if(this.count == 0 && this.flickering != 0){
+      this.on = true;
+      this.x = this.originalX;
+      this.y = this.originalY;
+    }
+    if(this.count >= this.flickering && this.flickering != 0){ //turn off ground for flickering time
+      this.on = false;
+    }
+    if(this.on){
+      this.count += 1;
+      image(groundImage, this.x, this.y, this.width, this.height);
+    }
+    else{//ground is off
+      this.x = -1000;
+      this.y = -1000;
+      this.count -= 1;
+    }
   }
 }
 class Character{
@@ -52,8 +186,8 @@ class Character{
     this.jumpPower = 0;
     this.jumpRate = 8;
     this.speed = 0;
-    this.accel = 0.1;
-    this.speedLimit = 8;
+    this.accel = 0.15;
+    this.speedLimit = 10;
     this.top = this.y;
     this.bottom = this.y+this.height;
     this.left = this.x;
@@ -100,6 +234,8 @@ class Character{
 function preload(){
   spritesheet = loadImage('assets/character.png');
   groundImage = loadImage('assets/ground.png');
+  bitCoinImage = loadImage('assets/bitcoin.png');
+  arcadeFont = loadFont('assets/ARCADE_N.ttf');
 }
 
 function setup(){
@@ -113,19 +249,25 @@ function setup(){
   context.imageSmoothingEnabled = false;
   //create class instances
   game = new Game();
+  scoreboard = new ScoreBoard(10, 30);
   character = new Character(0, game.ground-185, 200, 200);
-  groundArray = [
-    new Ground(200, game.ground-200, 200, 200, 0, 0),
-    new Ground(720, game.ground-350, 200, 200, 1, 200),
-    new Ground(200, game.ground-500, 200, 200, 0, 0)
-  ];
+  stages = new Stages();
+  bitCoinArray = stages.coinStages[scoreboard.stage];
+  groundArray = stages.groundStages[scoreboard.stage];
 }
 
 //get a sprite frame based on x y location in 4 x 4 matrix
 function drawFrame(x, y){
   character.x += character.speed;
+  if(character.x >= theCanvas.width-character.width/1.5){
+    if(bitCoinArray.length > 0){//if coins left on stage dont let pass
+      character.x = theCanvas.width-character.width/1.5
+    }
+  }
   if(character.x > theCanvas.width){
     character.x = 0;
+    scoreboard.stage += 1;
+    stages.loadNewStage();
   }
   else if(character.x < -character.width/4){
     character.x = -character.width/4;
@@ -174,30 +316,20 @@ function drawGrounds(){
   for(var i = 0; i < groundArray.length; i++){
     let currentGround = groundArray[i];
     currentGround.draw()
-    character.top = character.y;
-    character.bottom = character.y+character.height;
-    character.left = character.x;
-    character.right = character.x+character.width;
-    currentGround.left = currentGround.x;
-    currentGround.right = currentGround.x+currentGround.width;
-    currentGround.bottom = currentGround.y + currentGround.height;
-    currentGround.top = currentGround.y;
-    let higherThanGround = character.bottom < currentGround.top+81;
-    let lowerThanGround = character.bottom > currentGround.top+137;
-    let leftOfGround = character.right < currentGround.left+135;
-    let rightOfGround = character.left > currentGround.right-135;
-    if (!higherThanGround && !lowerThanGround && !leftOfGround && !rightOfGround) {
-      if(character.jumpPower >= 0){ //must land on tile when falling
-        character.jumpMode = false;
-        character.jumpPower = 0;
-        character.y = currentGround.top-100;
-        character.onTopOfBox = true;
-      }
-    }
+    currentGround.isHit();
+  }
+}
+
+function drawCoins(){
+  for(var i = 0; i < bitCoinArray.length; i++){
+    currentCoin = bitCoinArray[i];
+    currentCoin.draw();
+    currentCoin.isHit();
   }
 }
 function draw(){
   background(game.skyColor);
+  scoreboard.draw();
   //draw ground
   fill(game.grassColor);
   noStroke()
@@ -205,5 +337,6 @@ function draw(){
   character.move();
   character.animate();
   drawGrounds();
+  drawCoins();
   drawFrame(character.frame.x, character.frame.y);
 }
