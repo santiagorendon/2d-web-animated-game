@@ -49,6 +49,7 @@ class Character{
     this.bottom = this.y+this.height;
     this.left = this.x;
     this.right = this.x+this.width;
+    this.onTopOfBox = false;
   }
   animate(){
     game.count += 1;
@@ -125,10 +126,17 @@ function drawFrame(x, y){
     // degrade jump power slightly using gravity
     character.jumpPower += game.gravity;
     // did we go through the floor?  if so, stop jumping and put the player onto the floor
+
     if (character.y >= game.ground-185) {
       character.jumpMode = false;
       character.jumpPower = 0;
       character.pos = game.ground-185
+    }
+  }
+  else{ //not jumping
+    console.log(character.onTopOfBox)
+    if(!character.onTopOfBox){ //and not on top of box
+      character.jumpMode = true;
     }
   }
   widthOfFrame = spritesheet.width/m;
@@ -152,6 +160,7 @@ function windowResized() {
 }
 
 function drawGrounds(){
+  character.onTopOfBox = false;
   for(var i = 0; i < groundArray.length; i++){
     let currentGround = groundArray[i];
     currentGround.draw()
@@ -168,6 +177,7 @@ function drawGrounds(){
         character.jumpMode = false;
         character.jumpPower = 0;
         character.y = currentGround.top-100;
+        character.onTopOfBox = true;
       }
     }
   }
