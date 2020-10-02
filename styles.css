@@ -18,3 +18,27 @@ p{
   position: fixed;
   right: 5vw;
 }
+#link{
+  position: fixed;
+  left: 43vw;
+}
+
+/* unvisited link */
+a:link {
+  color: red;
+}
+
+/* visited link */
+a:visited {
+  color: #28FF01;
+}
+
+/* mouse over link */
+a:hover {
+  color: hotpink;
+}
+
+/* selected link */
+a:active {
+  color: blue;
+}

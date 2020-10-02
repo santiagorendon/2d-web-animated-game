@@ -26,15 +26,23 @@ function mouseClicked(){
   }
   else{ //main menu selection
     if(game.currentHover == "easy"){
+      menuSelectionSound.play();
+      menuLoopMusic.stop();
       game.startGame("easy")
     }
     else if(game.currentHover == "normal"){
+      menuSelectionSound.play();
+      menuLoopMusic.stop();
       game.startGame("normal");
     }
     else if(game.currentHover == "hard"){
+      menuSelectionSound.play();
+      menuLoopMusic.stop();
       game.startGame("hard");
     }
     else if(game.hoveringOverMainMenu){
+      menuSelectionSound.play();
+      gameWonLoopMusic.stop();
       game.ended = false;
     }
   }
@@ -128,7 +136,9 @@ class Stages{
     }
   }
   loadGameWon(){
-
+    game.musicCount = 0; //reset music counter
+    gameLoopMusic.stop(); //stop game music
+    gameWonLoopMusic.loop(); //load game won music
     game.currentHover = "none";
     character.x = -1000;
     character.y = -1000;
@@ -193,6 +203,8 @@ class Game{
     this.mainMenuColor = "green";
     this.flashCounter = 0;
     this.flashDelay = 3;
+    this.musicCount = 0;
+    this.musicDelay = 50;
   }
   drawMenu(){
     this.drawMenuText();
@@ -385,6 +397,8 @@ class BitCoin{
     let rightOfCoin = character.left > this.right-fX(70);
     //coin collected
     if (!higherThanCoin && !lowerThanCoin && !leftOfCoin && !rightOfCoin) {
+
+      coinSound.play();
       bitCoinArray.splice(this.index, 1);
       for(var i = 0; i < bitCoinArray.length;i++){ //re-index
         bitCoinArray[i].index = i;
@@ -503,6 +517,7 @@ class Character{
     if((keyIsDown(UP_ARROW) || keyIsDown(87) || keyIsDown(32)) && character.jumpMode === false ){ //jump
       character.jumpMode = true;
       character.jumpPower -= character.jumpRate;
+      jumpSound.play()
     }
     if (keyIsDown(LEFT_ARROW) || keyIsDown(65)){
       if(character.frame.y != 3){
@@ -575,6 +590,16 @@ function preload(){
   groundImage = loadImage('assets/ground.png');
   bitCoinImage = loadImage('assets/bitcoin.png');
   arcadeFont = loadFont('assets/ARCADE_N.ttf');
+  floorImage = loadImage('assets/floor.png');
+  coinSound = loadSound('assets/coin.wav');
+  coinSound.setVolume(0.4);
+  jumpSound = loadSound('assets/jump.wav');
+  menuSelectionSound = loadSound('assets/menuSelection.wav');
+  menuLoopMusic = loadSound('assets/menuLoop.mp3');
+  gameLoopMusic = loadSound('assets/gameLoop.wav');
+  gameLoopMusic.setVolume(0.2);
+  gameWonLoopMusic = loadSound('assets/gameWonLoop.wav');
+  gameWonLoopMusic.setVolume(0.6);
 }
 
 function setup(){
@@ -602,11 +627,12 @@ function cheatsSubmitted(){
   if(cheatcodes.value == 'TELEPORT'){
     game.cheatsEnabled = true;
     alert('click anywhere in game to teleport to that spot');
+    cheatcodes.placeholder = "ENTER CODE";
   }
   else{
-    cheatcodes.value = "";
     cheatcodes.placeholder = "WRONG CODE";
   }
+  cheatcodes.value = "";
 }
 
 function repositionCanvas() {
@@ -640,12 +666,21 @@ function drawCoins(){
 }
 function draw(){
   if(game.started){
+    game.musicCount += 1;
+    console.log(game.musicCount, game.musicDelay)
+    if(game.musicCount >= game.musicDelay){
+      if(!gameLoopMusic.isPlaying()){
+        gameLoopMusic.loop();
+      }
+    }
     background(game.skyColor);
     scoreboard.draw();
     //draw ground
     fill(game.grassColor);
     noStroke()
-    rect(0, game.ground, theCanvas.width, theCanvas.height);
+    //rect(0, game.ground, theCanvas.width, theCanvas.height);
+    // console.log(theCanvas.height-game.ground)
+    image(floorImage, 0, fY(820), theCanvas.width, theCanvas.height-game.ground+fY(100))
     character.move();
     character.animate();
     drawGrounds();
@@ -653,9 +688,12 @@ function draw(){
     character.drawFrame();
   }
   else if(game.ended){
-    game.drawGameEndMenu()
+    game.drawGameEndMenu();
   }
   else{//main menu
+    if(!menuLoopMusic.isPlaying()){
+      menuLoopMusic.loop();
+    }
     background(game.skyColor);
     game.drawMenu();
   }
