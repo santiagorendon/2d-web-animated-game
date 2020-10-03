@@ -1,6 +1,7 @@
 //easy - lower gravity
 //normal - no modifications
 //hard - ground speeds and flickers are faster
+let pxScale = window.devicePixelRatio;
 let canvas;
 let theCanvas;
 let character;
@@ -51,13 +52,13 @@ function mouseClicked(){
 //this will turn them into the correct proportion of the canvas width
 function fX(x){
   let myCanvasWidth = 1728;
-  return (x/myCanvasWidth)*theCanvas.width;
+  return ((x/myCanvasWidth)*theCanvas.width);
 }
 //i put in hard coded pixel values in the beginning
 //this will turn them into the correct proportion of the canvas height
 function fY(y){
   let myCanvasHeight = 984.6;
-  return (y/myCanvasHeight)*theCanvas.height;
+  return ((y/myCanvasHeight)*theCanvas.height);
 }
 class Stages{
   constructor(){
@@ -589,7 +590,7 @@ function preload(){
   spritesheet = loadImage('assets/character.png');
   groundImage = loadImage('assets/ground.png');
   bitCoinImage = loadImage('assets/bitcoin.png');
-  arcadeFont = loadFont('assets/ARCADE_N.ttf');
+  arcadeFont = loadFont('assets/ARCADE_N.TTF');
   floorImage = loadImage('assets/floor.png');
   coinSound = loadSound('assets/coin.wav');
   coinSound.setVolume(0.4);
@@ -604,10 +605,12 @@ function preload(){
 
 function setup(){
   theCanvas = createCanvas(1728, 984.6);
+
   repositionCanvas();
   canvas = document.querySelector('canvas');
   //smooth out the image
   context = canvas.getContext('2d');
+  context.scale(pxScale, pxScale);
   context.webkitImageSmoothingEnabled = false;
   context.mozImageSmoothingEnabled = false;
   context.imageSmoothingEnabled = false;
@@ -641,7 +644,6 @@ function repositionCanvas() {
   theCanvas.position(xPos, yPos);
   theCanvas.width = fX(1728);
   theCanvas.height = fY(984.6);
-
 }
 // this function runs every time the window is resized
 function windowResized() {
