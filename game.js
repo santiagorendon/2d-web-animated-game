@@ -604,13 +604,13 @@ function preload(){
 }
 
 function setup(){
-  theCanvas = createCanvas(1728, 984.6);
-
+  theCanvas = createCanvas(0.9*windowWidth, 0.9*windowHeight);
+  //theCanvas = createCanvas(1728*pxScale, 984.6*pxScale);
   repositionCanvas();
   canvas = document.querySelector('canvas');
   //smooth out the image
   context = canvas.getContext('2d');
-  context.scale(pxScale, pxScale);
+  //context.scale(pxScale, pxScale);
   context.webkitImageSmoothingEnabled = false;
   context.mozImageSmoothingEnabled = false;
   context.imageSmoothingEnabled = false;
