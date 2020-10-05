@@ -8,17 +8,18 @@ p{
   color: white;
 }
 #instructions{
-  font-size: 20px;
+  font-size: 1vw;
   position: absolute;
   left: 5vw;
 }
 
 #cheatcodes{
-  font-size: 20px;
+  font-size: 1vw;
   position: fixed;
   right: 5vw;
 }
 #link{
+  font-size: 1vw;
   position: fixed;
   left: 43vw;
 }
