@@ -228,17 +228,16 @@ class Game{
     character.x = 0;
     character.y = game.ground-fY(185);
     if(mode == "easy"){
-      this.gravity = 0.15;
+      this.gravity = fY(0.15);
     }
     else{
-      this.gravity = 0.2;
+      this.gravity = fY(0.2);
     }
     stages = new Stages();
     scoreboard.stage = 1;
     scoreboard.coinsCollected = 0;
     bitCoinArray = stages.coinStages[scoreboard.stage-1];
     groundArray = stages.groundStages[scoreboard.stage-1];
-    console.log(bitCoinArray);
   }
   drawMenuText(){
     this.count += this.countDirection;
@@ -493,10 +492,10 @@ class Character{
     this.frame = {x: 0, y: 0};
     this.jumpMode = false;
     this.jumpPower = 0;
-    this.jumpRate = 8;
+    this.jumpRate = fY(8);
     this.speed = 0;
-    this.accel = 0.15;
-    this.speedLimit = 10;
+    this.accel = fX(0.15);
+    this.speedLimit = fX(10);
     this.top = this.y;
     this.bottom = this.y+this.height;
     this.left = this.x;
@@ -667,7 +666,6 @@ function drawCoins(){
 function draw(){
   if(game.started){
     game.musicCount += 1;
-    console.log(game.musicCount, game.musicDelay)
     if(game.musicCount >= game.musicDelay){
       if(!gameLoopMusic.isPlaying()){
         gameLoopMusic.loop();
@@ -679,7 +677,6 @@ function draw(){
     fill(game.grassColor);
     noStroke()
     //rect(0, game.ground, theCanvas.width, theCanvas.height);
-    // console.log(theCanvas.height-game.ground)
     image(floorImage, 0, fY(820), theCanvas.width, theCanvas.height-game.ground+fY(100))
     character.move();
     character.animate();
