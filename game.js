@@ -90,7 +90,7 @@ class Stages{
       new Ground(fX(1360), game.ground-fY(775), fX(200), fY(200))
     ]
     this.stage3Coins = [
-      new BitCoin(1420, 50, 0)
+      new BitCoin(fX(1420), fY(50), 0)
     ]
     this.stage4Grounds = [
       new Ground(fX(1100), game.ground-fY(275), fX(200), fX(200)),
@@ -281,7 +281,6 @@ class Game{
     }
     //txt2.isHit();
     //txt3.isHit();
-
   }
   isHit(x, y, w, h, index){
     let textTop = y;
@@ -398,7 +397,6 @@ class BitCoin{
     let rightOfCoin = character.left > this.right-fX(70);
     //coin collected
     if (!higherThanCoin && !lowerThanCoin && !leftOfCoin && !rightOfCoin) {
-
       coinSound.play();
       bitCoinArray.splice(this.index, 1);
       for(var i = 0; i < bitCoinArray.length;i++){ //re-index
