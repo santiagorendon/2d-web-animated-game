@@ -589,7 +589,6 @@ function updateCounter(){
   preloadCounter++;
   var progress_bar = select('#progress_bar');
   progress_bar.style('width', int(preloadCounter/preloadMaxCounter*100) + "%");
-  console.log('yeh')
 }
 function preload(){
   preloadMaxCounter++;
