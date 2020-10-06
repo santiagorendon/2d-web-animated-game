@@ -15,6 +15,8 @@ let m = 4;
 let submitBtn;
 let binArray;
 let bin;
+var preloadCounter = 0;
+var preloadMaxCounter = 0;
 //for debugging
 function mouseClicked(){
   if(game.started){
@@ -583,20 +585,38 @@ class Character{
   }
 }
 
+function updateCounter(){
+  preloadCounter++;
+  var progress_bar = select('#progress_bar');
+  progress_bar.style('width', int(preloadCounter/preloadMaxCounter*100) + "%");
+  console.log('yeh')
+}
 function preload(){
-  spritesheet = loadImage('assets/character.png');
-  groundImage = loadImage('assets/ground.png');
-  bitCoinImage = loadImage('assets/bitcoin.png');
-  arcadeFont = loadFont('assets/ARCADE_N.TTF');
-  floorImage = loadImage('assets/floor.png');
-  coinSound = loadSound('assets/coin.wav');
+  preloadMaxCounter++;
+  spritesheet = loadImage('assets/character.png', updateCounter);
+  preloadMaxCounter++;
+  groundImage = loadImage('assets/ground.png', updateCounter);
+  preloadMaxCounter++;
+  bitCoinImage = loadImage('assets/bitcoin.png', updateCounter);
+  preloadMaxCounter++;
+  arcadeFont = loadFont('assets/ARCADE_N.TTF', updateCounter);
+  preloadMaxCounter++;
+  floorImage = loadImage('assets/floor.png', updateCounter);
+  preloadMaxCounter++;
+  coinSound = loadSound('assets/coin.wav', updateCounter);
+  preloadMaxCounter++;
   coinSound.setVolume(0.4);
-  jumpSound = loadSound('assets/jump.wav');
-  menuSelectionSound = loadSound('assets/menuSelection.wav');
-  menuLoopMusic = loadSound('assets/menuLoop.mp3');
-  gameLoopMusic = loadSound('assets/gameLoop.wav');
+  jumpSound = loadSound('assets/jump.wav', updateCounter);
+  preloadMaxCounter++;
+  menuSelectionSound = loadSound('assets/menuSelection.wav', updateCounter);
+  preloadMaxCounter++;
+  menuLoopMusic = loadSound('assets/menuLoop.mp3', updateCounter);
+  preloadMaxCounter++;
+  gameLoopMusic = loadSound('assets/gameLoop.wav', updateCounter);
+  preloadMaxCounter++;
   gameLoopMusic.setVolume(0.2);
-  gameWonLoopMusic = loadSound('assets/gameWonLoop.wav');
+  gameWonLoopMusic = loadSound('assets/gameWonLoop.wav', updateCounter);
+  preloadMaxCounter++;
   gameWonLoopMusic.setVolume(0.6);
 }
 
