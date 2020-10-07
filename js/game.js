@@ -1,13 +1,14 @@
 //easy - lower gravity
 //normal - no modifications
 //hard - ground speeds and flickers are faster
-let pxScale = window.devicePixelRatio;
+//let pxScale = window.devicePixelRatio;
 let canvas;
 let theCanvas;
 let character;
 let context;
 let bitCoinArray;
 let stages;
+let scoreboard;
 let groundArray;
 //n * m sprite
 let n = 4;
@@ -17,6 +18,9 @@ let binArray;
 let bin;
 var preloadCounter = 0;
 var preloadMaxCounter = 0;
+let myCanvasWidth = 1728;
+let myCanvasHeight = 984.6;
+
 //for debugging
 function mouseClicked(){
   if(game.started){
@@ -50,17 +54,19 @@ function mouseClicked(){
     }
   }
 }
+//unused at the moment
 //i put in hard coded pixel values in the beginning
 //this will turn them into the correct proportion of the canvas width
 function fX(x){
-  let myCanvasWidth = 1728;
-  return ((x/myCanvasWidth)*theCanvas.width);
+  // return ((x/myCanvasWidth)*theCanvas.width);
+  return x;
 }
+//unused at the moment
 //i put in hard coded pixel values in the beginning
 //this will turn them into the correct proportion of the canvas height
 function fY(y){
-  let myCanvasHeight = 984.6;
-  return ((y/myCanvasHeight)*theCanvas.height);
+  // return ((y/myCanvasHeight)*theCanvas.height);
+  return y;
 }
 class Stages{
   constructor(){
@@ -73,17 +79,41 @@ class Stages{
       new BitCoin(fX(265), fY(320), 0) //x, y, index
     ]
     this.stage2Grounds = [
+      new Ground(fX(180), game.ground-fY(200), fX(200), fY(200)),
+      new Ground(fX(350), game.ground-fY(450), fX(200), fY(200), 0, 0, 2, 150),
+      new Ground(fX(700), game.ground-fY(500), fX(200), fY(200), 2, 250),
+      new Ground(fX(1400), game.ground-fY(700), fX(200), fY(200), 0, 0, 2, 150),
+      new Ground(fX(950), game.ground-fY(730), fX(200), fY(200)),
+      new Ground(fX(180), game.ground-fY(730), fX(200), fY(200), 1.5, 250),
+    ]
+    this.stage2Coins = [
+      new BitCoin(fX(60), fY(130), 0), //x, y, index
+      new BitCoin(fX(1460), fY(50), 1)
+    ]
+    this.stage3Grounds = [
       new Ground(fX(400), game.ground-fY(275), fX(200), fY(200)),
       new Ground(fX(700), game.ground-fY(475), fX(200), fY(200), 0, 0, 0, 0, 30),
       new Ground(fX(960), game.ground-fY(800), fX(200), fY(200), fX(1), fX(200), fY(1), fY(200)),
       new Ground(fX(1450), game.ground-fY(805), fX(200), fY(200)),
       new Ground(fX(400), game.ground-fY(805), fX(200), fY(200))
     ]
-    this.stage2Coins = [
+    this.stage3Coins = [
       new BitCoin(fX(465), 10, 0),
       new BitCoin(fX(1515), 50, 1)
     ]
-    this.stage3Grounds = [
+    this.stage4Grounds = [
+      new Ground(fX(200), game.ground-fY(200), fX(200), fY(200)),
+      new Ground(fX(450), game.ground-fY(350), fX(200), fY(200),0,0,0,0,50),
+      new Ground(fX(1000), game.ground-fY(400), fX(200), fY(200)),
+      new Ground(fX(1100), game.ground-fY(600), fX(200), fY(200),0,0,0,0,30),
+      new Ground(fX(1000), game.ground-fY(800), fX(200), fY(200),0,0,0,0,50),
+      new Ground(fX(450), game.ground-fY(605), fX(200), fY(200),0,0,0,0,50),
+    ]
+    this.stage4Coins = [
+      new BitCoin(fX(255), fY(80), 0), //x, y, index
+      new BitCoin(fX(1450), fY(200), 1) //x, y, index
+    ]
+    this.stage5Grounds = [
       new Ground(fX(400), game.ground-fY(275), fX(200), fY(200)),
       new Ground(fX(1200), game.ground-fY(355), fX(200), fY(200)),
       new Ground(fX(480), game.ground-fY(485), fX(200), fY(200)),
@@ -91,26 +121,26 @@ class Stages{
       new Ground(fX(560), game.ground-fY(695), fX(200), fY(200)),
       new Ground(fX(1360), game.ground-fY(775), fX(200), fY(200))
     ]
-    this.stage3Coins = [
+    this.stage5Coins = [
       new BitCoin(fX(1420), fY(50), 0)
     ]
-    this.stage4Grounds = [
+    this.stage6Grounds = [
       new Ground(fX(1100), game.ground-fY(275), fX(200), fX(200)),
       new Ground(fX(700), game.ground-fY(475), fX(200), fX(200)),
       new Ground(fX(1550), game.ground-fY(630), fX(200), fX(200), 0, 0, fY(1), fY(150)),
       new Ground(fX(1100), game.ground-fY(805), fX(200), fX(200)),
       new Ground(fX(500), game.ground-fY(805), fX(200), fX(200), fY(4), fY(300))
     ]
-    this.stage4Coins = [
+    this.stage6Coins = [
       new BitCoin(fX(200), fY(90), 0),
       new BitCoin(fX(1400), fY(500), 1)
     ]
-    this.stage5Coins = [
+    this.stage7Coins = [
       new BitCoin(fX(250), fY(320), 0),
       new BitCoin(fX(80), fY(100), 1),
       new BitCoin(fX(1000), fY(500), 2)
     ]
-    this.stage5Grounds = [
+    this.stage7Grounds = [
       new Ground(fX(250), game.ground-fY(200), fX(200), fY(200), 0, 0, 0, 0, 50),
       new Ground(fX(760), game.ground-fY(401), fX(200), fY(200)),
       new Ground(fX(1200), game.ground-fY(601), fX(200), fY(200), 0, 0, 0, 0, 160),
@@ -120,13 +150,17 @@ class Stages{
                          this.stage2Grounds,
                          this.stage3Grounds,
                          this.stage4Grounds,
-                         this.stage5Grounds
+                         this.stage5Grounds,
+                         this.stage6Grounds,
+                         this.stage7Grounds
     ];
     this.coinStages = [this.stage1Coins,
                        this.stage2Coins,
                        this.stage3Coins,
                        this.stage4Coins,
-                       this.stage5Coins
+                       this.stage5Coins,
+                       this.stage6Coins,
+                       this.stage7Coins
     ];
   }
   loadNewStage(){
@@ -151,7 +185,7 @@ class Stages{
     canvas.style.display = "block"
 
     bin = ["0", "1"];
-    let cols = theCanvas.width/22;
+    let cols = myCanvasWidth/22;
     binArray = [];
 
     for(let i=0; i < cols; i++){
@@ -160,12 +194,13 @@ class Stages{
   }
 }
 class ScoreBoard{
-  constructor(x, y){
+  constructor(x, y, stageCount){
     this.stage = 1;
     this.coinsCollected = 0;
     this.x = x;
     this.y = y;
-    this.color = '#000'
+    this.color = '#000';
+    this.stageCount = stageCount;
   }
   draw(){
     fill(this.color)
@@ -173,7 +208,7 @@ class ScoreBoard{
   .strokeWeight(0)
    .textSize(20);
     textFont(arcadeFont);
-    text(`BitCoin ${this.coinsCollected}\nStage ${this.stage}`, this.x, this.y);
+    text(`BitCoin ${this.coinsCollected}\nStage (${this.stage}/${this.stageCount})`, this.x, this.y);
   }
 }
 class Game{
@@ -186,7 +221,7 @@ class Game{
     this.count = 0;
     this.countDirection = 1;
     this.delay = 15;
-    this.ground = theCanvas.height*0.90;
+    this.ground = myCanvasHeight*0.90;
     this.grassColor = "#7EC850";
     this.skyColor = "#D1EEFE";
     this.color = '#000';
@@ -208,6 +243,16 @@ class Game{
     this.flashDelay = 3;
     this.musicCount = 0;
     this.musicDelay = 50;
+    this.instructionColor = "#FFA500";
+    this.instructionSize = 25;
+  }
+  drawInstructions(instructionNum){
+    if(instructionNum === 1){
+      fill(this.instructionColor)
+      textSize(this.instructionSize );
+       textFont(arcadeFont);
+      text("Once you collect every coin,\nexit to the right of the screen->",fX(880), fY(400));
+    }
   }
   drawMenu(){
     this.drawMenuText();
@@ -236,6 +281,7 @@ class Game{
       this.gravity = fY(0.2);
     }
     stages = new Stages();
+    scoreboard = new ScoreBoard(fX(10), fY(30), stages.coinStages.length);
     scoreboard.stage = 1;
     scoreboard.coinsCollected = 0;
     bitCoinArray = stages.coinStages[scoreboard.stage-1];
@@ -254,7 +300,7 @@ class Game{
      .textSize(fY(80));
     textFont(arcadeFont);
     textAlign(CENTER, TOP);
-    text("BitFarmer", theCanvas.width/2, theCanvas.height/4);
+    text("BitFarmer", myCanvasWidth/2, myCanvasHeight/4);
     textSize(fY(30));
     if(this.currentHover == "none"){ //not hovering over anything
       this.fontEasy = 30;
@@ -266,17 +312,17 @@ class Game{
     }
     fill(this.colorEasy)
     textSize(fY(this.fontEasy));
-    text("easy", theCanvas.width*0.38, theCanvas.height/1.3, fY(30));
+    text("easy", myCanvasWidth*0.38, myCanvasHeight/1.3, fY(30));
     fill(this.colorNormal);
     textSize(fY(this.fontNormal));
-    text("normal", theCanvas.width*0.5, theCanvas.height/1.3, fY(30));
+    text("normal", myCanvasWidth*0.5, myCanvasHeight/1.3, fY(30));
     fill(this.colorHard);
     textSize(fY(this.fontHard));
-    text("hard", theCanvas.width*0.62, theCanvas.height/1.3, fY(30));
+    text("hard", myCanvasWidth*0.62, myCanvasHeight/1.3, fY(30));
 
-    let r1 = this.isHit(theCanvas.width*0.38, theCanvas.height/1.3, fX(60), fY(28), 0);
-    let r2 =this.isHit(theCanvas.width*0.5, theCanvas.height/1.3, fX(85), fY(28), 1);
-    let r3 = this.isHit(theCanvas.width*0.62, theCanvas.height/1.3, fX(56), fY(28), 2);
+    let r1 = this.isHit(myCanvasWidth*0.38, myCanvasHeight/1.3, fX(60), fY(28), 0);
+    let r2 =this.isHit(myCanvasWidth*0.5, myCanvasHeight/1.3, fX(85), fY(28), 1);
+    let r3 = this.isHit(myCanvasWidth*0.62, myCanvasHeight/1.3, fX(56), fY(28), 2);
     if(r1+r2+r3 ===0){
       this.currentHover="none";
     }
@@ -316,8 +362,7 @@ class Game{
   }
   drawGameEndMenu(){
     fill('rgba(0, 0, 0, 0.05)');
-    rect(0,0, theCanvas.width, theCanvas.height);
-    //context.font = "22px arial";
+    rect(0,0, myCanvasWidth, myCanvasHeight);
     textFont('arial')
     fill("green").textSize(22);
     this.flashCounter += 1;
@@ -326,7 +371,7 @@ class Game{
       for(let i=0; i < binArray.length; i++){
         let textContent = bin[Math.floor(Math.random()*bin.length)];
         text(textContent, i * 22, binArray[i] * 22);
-        if(binArray[i] * 22 >  theCanvas.height && Math.random() > 0.98){
+        if(binArray[i] * 22 >  myCanvasHeight && Math.random() > 0.98){
           binArray[i] = 0;
         }
         binArray[i] += 1;
@@ -338,11 +383,11 @@ class Game{
     fill("red")
     textSize(fY(80))
     textAlign(CENTER, CENTER)
-    text('YOU WON!', theCanvas.width/2, theCanvas.height/2);
+    text('YOU WON!', myCanvasWidth/2, myCanvasHeight/2);
     textSize(fY(this.mainMenuSize))
     fill(this.mainMenuColor)
-    text("MAIN MENU", theCanvas.width*0.475, theCanvas.height*0.65);
-    this.mainMenuIsHit(theCanvas.width*0.475, theCanvas.height*0.65, fX(129), fY(28));
+    text("MAIN MENU", myCanvasWidth*0.475, myCanvasHeight*0.65);
+    this.mainMenuIsHit(myCanvasWidth*0.475, myCanvasHeight*0.65, fX(129), fY(28));
   }
   mainMenuIsHit(x, y, w, h){
     let textTop = y;
@@ -543,12 +588,12 @@ class Character{
   //get a sprite frame based on x y location in 4 x 4 matrix
   drawFrame(){
     this.x += this.speed;
-    if(this.x >= theCanvas.width-this.width/1.5){
+    if(this.x >= myCanvasWidth-this.width/1.5){
       if(bitCoinArray.length > 0){//if coins left on stage dont let pass
-        this.x = theCanvas.width-this.width/1.5
+        this.x = myCanvasWidth-this.width/1.5
       }
     }
-    if(this.x > theCanvas.width){
+    if(this.x > myCanvasWidth){
       scoreboard.stage += 1;
       stages.loadNewStage();
       this.x = 0;
@@ -592,6 +637,8 @@ function updateCounter(){
 }
 function preload(){
   preloadMaxCounter++;
+  backgroundImage = loadImage('assets/background.png', updateCounter);
+  preloadMaxCounter++;
   spritesheet = loadImage('assets/character.png', updateCounter);
   preloadMaxCounter++;
   groundImage = loadImage('assets/ground.png', updateCounter);
@@ -620,23 +667,21 @@ function preload(){
 }
 
 function setup(){
-  theCanvas = createCanvas(0.9*windowWidth, 0.9*windowHeight);
-  //theCanvas = createCanvas(1728*pxScale, 984.6*pxScale);
-  repositionCanvas();
+  theCanvas = createCanvas(myCanvasWidth, myCanvasHeight);
+
+  theCanvas.parent('#container');
+  theCanvas.style('width', '100%');
+  theCanvas.style('height', '100%');
+
   canvas = document.querySelector('canvas');
   //smooth out the image
   context = canvas.getContext('2d');
-  //context.scale(pxScale, pxScale);
   context.webkitImageSmoothingEnabled = false;
   context.mozImageSmoothingEnabled = false;
   context.imageSmoothingEnabled = false;
   //create class instances
   game = new Game("normal");
-  scoreboard = new ScoreBoard(fX(10), fY(30));
   character = new Character(0, game.ground-fY(185), fX(200), fY(200));
-  //mainMenuCharacter = new Character(0, game.ground-fY(185), fX(200), fY(200));
-  // bitCoinArray = stages.coinStages[2];
-  // groundArray = stages.groundStages[2];
   let submitBtn = document.querySelector('#submit');
   submitBtn.addEventListener('click', cheatsSubmitted);
 }
@@ -652,18 +697,6 @@ function cheatsSubmitted(){
     cheatcodes.placeholder = "WRONG CODE";
   }
   cheatcodes.value = "";
-}
-
-function repositionCanvas() {
-  var xPos = int(windowWidth/2 - 0.5*width);
-  var yPos = int(windowHeight/2 - 0.5*height);
-  theCanvas.position(xPos, yPos);
-  theCanvas.width = fX(1728);
-  theCanvas.height = fY(984.6);
-}
-// this function runs every time the window is resized
-function windowResized() {
-  repositionCanvas();
 }
 
 function drawGrounds(){
@@ -682,35 +715,49 @@ function drawCoins(){
     currentCoin.isHit();
   }
 }
+function drawBackground(color, gameState){
+  if(gameState === "game"){
+    image(backgroundImage, 0, 0, myCanvasWidth, myCanvasHeight);
+  }
+  else if(gameState === "menu"){
+    stroke(color);
+    strokeWeight(10);
+    fill(color);
+    rect(0, 0, myCanvasWidth, myCanvasHeight);
+  }
+
+}
 function draw(){
-  if(game.started){
+  if(game.started){ //IN GAME
     game.musicCount += 1;
     if(game.musicCount >= game.musicDelay){
       if(!gameLoopMusic.isPlaying()){
         gameLoopMusic.loop();
       }
     }
-    background(game.skyColor);
+    drawBackground(game.skyColor, "game");
     scoreboard.draw();
+    if(scoreboard.stage === 1){ //draw tutorial text
+      game.drawInstructions(1);
+    }
     //draw ground
     fill(game.grassColor);
-    noStroke()
-    //rect(0, game.ground, theCanvas.width, theCanvas.height);
-    image(floorImage, 0, fY(820), theCanvas.width, theCanvas.height-game.ground+fY(100))
+    noStroke();
+    image(floorImage, 0, fY(820), myCanvasWidth, myCanvasHeight-game.ground+fY(100))
     character.move();
     character.animate();
     drawGrounds();
     drawCoins();
     character.drawFrame();
   }
-  else if(game.ended){
+  else if(game.ended){ //END GAME
     game.drawGameEndMenu();
   }
   else{//main menu
     if(!menuLoopMusic.isPlaying()){
       menuLoopMusic.loop();
     }
-    background(game.skyColor);
+    drawBackground(game.skyColor, "menu");
     game.drawMenu();
   }
 }
